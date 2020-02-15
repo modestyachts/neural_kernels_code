@@ -14,7 +14,6 @@ from torch.multiprocessing import Queue, Process, Value
 from queue import Empty
 
 import tc_kernels as tck
-import model_repository
 import utils
 from torch.utils.data import TensorDataset, DataLoader
 from tqdm import tqdm
@@ -236,17 +235,8 @@ def _symmetric_fill(K, x, y, batch_size):
             K[start_x:end_x, start_y:end_y] = K[start_y:end_y, start_x:end_x].T
     return K
 
-def checkpoint_fn(model_uuid, shape_K, extra_info):
-    repo = model_repository.ModelRepository()
 
-    extra_info = extra_info.copy()
-    extra_info["info"] = "progress not final"
-    K = np.memmap("/dev/shm/kernel", mode="r+", dtype="float64", shape=shape_K)
-    rows_done = np.memmap("/dev/shm/rowsdone", mode="r+", dtype="uint16", shape=(1,))
-    K = np.copy(K[0:rows_done[0]])
-    return repo.create_checkpoint(model_uuid=model_uuid, kernel_data_bytes=utils.numpy_to_bytes(K), model_data_bytes=utils.numpy_to_bytes(rows_done), extra_info=extra_info)
-
-def generate_kernel(dnet, x, y, batch_size=16, symmetric=False, model_uuid=None, checkpoint_K=None, checkpoint_rows_done=None, cache_path="tc_cache", float32=False, extra_info={}):
+def generate_kernel(dnet, x, y, batch_size=16, symmetric=False, cache_path="tc_cache", float32=False, extra_info={}):
     ''' Takes in two numpy arrays x and y that are N x H x W x C and M x H x W x C
         and spits out a kernel matrix K that is N x M
     '''
