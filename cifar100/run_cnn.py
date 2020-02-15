@@ -2,8 +2,6 @@ import numpy as np
 import tqdm
 import copy
 import io
-import model_repository
-import utils
 
 import torch
 import torch.nn as nn
@@ -12,19 +10,23 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
 
+import sys
+sys.path.insert(0, "..")
+import utils
+
+
 def run_exp():
-    num_filters = 2*128*8 #128*8
-    epochs = 250
+    num_filters = 2*128*8
+    epochs = 200
     bias = False
-    loss_fn = 'crossentropy'#"mse"
-    act = 'relu'
-    opt = 'sgd'#'adam'#'sgd'
+    loss_fn = 'crossentropy'
+    opt = 'sgd'
     zca = True
     augmentation = None #'flips'
     parallel = True
     half = False
     batch = False
-    best_acc = 64.0
+    best_acc = 0.0
 
     class Flatten(nn.Module):
         def forward(self, input):
@@ -35,16 +37,9 @@ def run_exp():
             eps=1e-8
             if half:
                 eps = 1e-3
-            return nn.functional.normalize(input, p=2, dim=1, eps=eps) # eps changed for half precision
-    
-    class Cosine(nn.Module):
-        def forward(self, input):
-            return torch.cat((torch.cos(input[:int(input.size(0)/2)]), torch.sin(input[int(input.size(0)/2):])), 0)
+            return nn.functional.normalize(input, p=2, dim=1, eps=eps)
 
-    if act == 'cos':
-        activation = Cosine
-    else:
-        activation = nn.ReLU
+    activation = nn.ReLU
 
     net = nn.Sequential(
         nn.Conv2d(3, num_filters, kernel_size=3, stride=1, padding=1, bias=bias),
@@ -96,21 +91,15 @@ def run_exp():
     if loss_fn == "mse":
         square_loss = True
         criterion = nn.MSELoss()
-        # criterion = nn.MSELoss(reduction='sum')
     else:
         criterion = nn.CrossEntropyLoss()
     if opt == 'sgd':
-        lr_init = .01#.05#.1#0.05 #0.1#0.01 #0.001
+        lr_init = .01
         optimizer = optim.SGD(net.parameters(), lr=lr_init, momentum=0.9, weight_decay=0.0005 , nesterov=True)
-        # lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[150, 220, 280, 320], gamma=0.2, last_epoch=-1)
-        lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[80, 160, 210], gamma=0.2, last_epoch=-1)
-        # lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[50, 90, 120], gamma=0.1, last_epoch=-1)
-        # optimizer = optim.SGD(net.parameters(), lr=0.0005, momentum=0.9, weight_decay=0.0005 , nesterov=True)
-        # lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[60, 120, 160, 200, 230], gamma=0.2, last_epoch=-1)
+        lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80, 120], gamma=0.2, last_epoch=-1)
     else:
-        # optimizer = torch.optim.Adam(net.parameters(), lr=0.001)
         optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
-    
+
     batch_size = 128
     num_classes = 100
     print_every = 1
@@ -118,19 +107,10 @@ def run_exp():
     trainset = torchvision.datasets.CIFAR100('./data', train=True, transform=None, target_transform=None, download=True)
     testset = torchvision.datasets.CIFAR100('./data', train=False, transform=None, target_transform=None, download=True)
     (X_train, X_test), global_ZCA = utils.preprocess(trainset.data, testset.data, min_divisor=1e-8, zca_bias=1e-4, return_weights=True)
-    
+
     print('Got Data')
     y_train = np.array(trainset.targets)
     y_test = np.array(testset.targets)
-
-    if augmentation == 'flips':
-        train_transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.ToTensor()
-            ])
-    else:
-        train_transform = None
 
     class CustomTensorDataset(torch.utils.data.Dataset):
         """TensorDataset with support of transforms.
@@ -143,8 +123,8 @@ def run_exp():
 
         def __getitem__(self, idx):
             x = self.tensors[idx]
-            
-            if self.transform:
+
+            if self.transform == 'flips':
                 if np.random.binomial(1,0.5) == 1:
                     x = x.flip(2)
             y = self.targets[idx]
@@ -157,27 +137,19 @@ def run_exp():
     X_train = np.transpose(X_train, (0,3,1,2))
     X_test = np.transpose(X_test, (0,3,1,2))
     if augmentation == 'flips':
-        trainset = CustomTensorDataset(torch.Tensor(X_train), torch.tensor(y_train, dtype=torch.long), transform=train_transform)
+        trainset = CustomTensorDataset(torch.Tensor(X_train), torch.tensor(y_train, dtype=torch.long), transform=augmentation)
         testset = CustomTensorDataset(torch.Tensor(X_test), torch.tensor(y_test, dtype=torch.long))
     else:
         trainset = torch.utils.data.TensorDataset(torch.Tensor(X_train), torch.tensor(y_train, dtype=torch.long))
         testset = torch.utils.data.TensorDataset(torch.Tensor(X_test), torch.tensor(y_test, dtype=torch.long))
-    '''
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-    trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=transform)
-    testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                       download=True, transform=transform)
-    '''
+
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
                                               shuffle=True, num_workers=0)
     testloader = torch.utils.data.DataLoader(testset, batch_size=int(batch_size/2),
                                              shuffle=False, num_workers=0)
-    
+
     best_model_wts = copy.deepcopy(net.state_dict())
-    
+
     if augmentation:
         aug_str = '_' + str(augmentation)
     else:
@@ -195,6 +167,7 @@ def run_exp():
         batch_str = '_batch'
     else:
         batch_str = ''
+
     for epoch in range(epochs):
         running_loss = 0.0
         net.train()
@@ -214,7 +187,6 @@ def run_exp():
             train_total += labels.size(0)
             train_correct += (predicted == labels).sum().item()
             if square_loss:
-                # labels = F.one_hot(labels, num_classes=10).to(dtype=torch.float16, device=device)
                 labels = torch.FloatTensor(outputs.size()).zero_().scatter_(1, labels.detach().cpu().reshape(outputs.size()[0], 1), 1).to(dtype=dtype, device=device)
             loss = criterion(outputs, labels)
             loss.backward()
@@ -242,7 +214,6 @@ def run_exp():
                     test_total += labels.size(0)
                     test_correct += (predicted == labels).sum().item()
                     if square_loss:
-                        # labels = F.one_hot(labels, num_classes=10).to(dtype=torch.float16, device=device)
                         labels = torch.FloatTensor(outputs.size()).zero_().scatter_(1, labels.detach().cpu().reshape(outputs.size()[0], 1), 1).to(dtype=dtype, device=device)
                     loss = criterion(outputs, labels)
                     test_loss += loss.item()
@@ -260,8 +231,6 @@ def run_exp():
 
     torch.save(copy.deepcopy(net.state_dict()), 'weights-100/myrtle10' + str(opt) + '_' + str(loss_fn) + '_' + str(act) + '_' + str(num_filters) + '_' + str(epochs) + 'ep' + zca_str + aug_str + half_str + batch_str + '.pt')
     net.load_state_dict(best_model_wts)
-    
-    # net.load_state_dict(torch.load('weights/myrtle10sgd_mse_relu_1024_zca_best.pt'))
 
     correct = 0
     total = 0
@@ -281,4 +250,3 @@ def run_exp():
 
 if __name__ == "__main__":
     run_exp()
-
