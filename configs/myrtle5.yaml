@@ -20,4 +20,7 @@ KERNEL:
           precision: float64
         - layer: pool8
           precision: float64
+          store_norm: true
+        - layer: relu_project
+          precision: float64
 

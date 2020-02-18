@@ -47,5 +47,9 @@ KERNEL:
     store_norm: false
     precision: float64
   - layer: pool8
+    store_norm: True
+    precision: float64
+  - gamma: 1.0
+    layer: exponential_shifted_project
     store_norm: false
     precision: float64
