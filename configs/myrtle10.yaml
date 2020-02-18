@@ -1,0 +1,42 @@
+KERNEL:
+  ARCH:
+  - layer: conv3zp
+  - layer: relu
+    store_norm: false
+  - layer: conv3zp
+  - layer: relu
+    store_norm: false
+  - layer: conv3zp
+  - layer: relu
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+  - layer: conv3zp
+  - layer: relu
+    store_norm: false
+  - layer: conv3zp
+  - layer: relu
+    store_norm: false
+  - layer: conv3zp
+  - layer: relu
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+  - layer: conv3zp
+    precision: float64
+  - layer: relu
+    store_norm: false
+    precision: float64
+  - layer: conv3zp
+    precision: float64
+  - layer: relu
+    store_norm: false
+    precision: float64
+  - layer: conv3zp
+    precision: float64
+  - layer: relu
+    store_norm: false
+    precision: float64
+  - layer: pool8
+    store_norm: false
+    precision: float64

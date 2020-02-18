@@ -1,0 +1,59 @@
+KERNEL:
+  ARCH:
+  - layer: input
+  - layer: conv3zp
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+  - layer: conv3zp
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+  - layer: conv3zp
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+  - layer: conv3zp
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+  - layer: conv3zp
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+  - layer: conv3zp
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+
+  - layer: conv3zp
+    precision: float64
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+    precision: float64
+  - layer: conv3zp
+    precision: float64
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+    precision: float64
+  - layer: conv3zp
+    precision: float64
+  - gamma: 1.0
+    layer: exponential_shifted
+    store_norm: false
+    precision: float64
+  - layer: pool8
+    store_norm: false
+    precision: float64
+  - layer: conv3zp
+    precision: float64
+  - gamma: 1.0
+    layer: exponential_shifted_project
+    store_norm: false
+    precision: float64
