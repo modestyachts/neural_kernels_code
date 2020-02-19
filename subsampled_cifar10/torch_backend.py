@@ -110,7 +110,6 @@ class Correct_MSE(nn.Module):
     def forward(self, classifier, target):
         return classifier.max(dim=1)[1] == target.max(dim=1)[1]
 
-# Modified from Alex Fang
 class NormLayer(nn.Module):
     # num_groups and channels_per_group both control group norm. Only one of these should not be None. 
     # num_groups=0 and channels_per_group=1 are aliases for instance_norm=True. 
