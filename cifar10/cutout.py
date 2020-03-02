@@ -1,6 +1,7 @@
 import numbers
 import numpy as np
 import random
+import torch
 
 class Cutout(object):
     """Randomly mask out one or more patches from an image.

@@ -226,10 +226,10 @@ def run_exp():
             if testacc >= best_acc:
                 best_acc = testacc
                 best_model_wts = copy.deepcopy(net.state_dict())
-                torch.save(best_model_wts, 'weights-100/myrtle10' + str(opt) + '_' + str(loss_fn) + '_' + str(act) + '_' + str(num_filters) + zca_str + aug_str + half_str + batch_str + '_best.pt')
+                torch.save(best_model_wts, 'weights-100/myrtle10' + str(opt) + '_' + str(loss_fn) + '_' + str(num_filters) + zca_str + aug_str + half_str + batch_str + '_best.pt')
             print("Best so far: " + str(best_acc))
 
-    torch.save(copy.deepcopy(net.state_dict()), 'weights-100/myrtle10' + str(opt) + '_' + str(loss_fn) + '_' + str(act) + '_' + str(num_filters) + '_' + str(epochs) + 'ep' + zca_str + aug_str + half_str + batch_str + '.pt')
+    torch.save(copy.deepcopy(net.state_dict()), 'weights-100/myrtle10' + str(opt) + '_' + str(loss_fn) + '_' + str(num_filters) + '_' + str(epochs) + 'ep' + zca_str + aug_str + half_str + batch_str + '.pt')
     net.load_state_dict(best_model_wts)
 
     correct = 0

@@ -169,9 +169,9 @@ def run_exp():
     else:
         half_str = ''
 
-    torch.save(copy.deepcopy(net.state_dict()), 'weights-mnist/myrtle5' + str(opt) + '_' + str(loss_fn) + '_' + str(act) + '_' + str(num_filters) + '_' + str(epochs) + 'ep' + zca_str + aug_str + half_str + '.pt')
+    torch.save(copy.deepcopy(net.state_dict()), 'weights-mnist/myrtle5' + str(opt) + '_' + str(loss_fn) + '_' + str(num_filters) + '_' + str(epochs) + 'ep' + zca_str + aug_str + half_str + '.pt')
     net.load_state_dict(best_model_wts)
-    torch.save(best_model_wts, 'weights-mnist/myrtle5' + str(opt) + '_' + str(loss_fn) + '_' + str(act) + '_' + str(num_filters) + zca_str + aug_str + half_str + '_best.pt')
+    torch.save(best_model_wts, 'weights-mnist/myrtle5' + str(opt) + '_' + str(loss_fn) + '_' + str(num_filters) + zca_str + aug_str + half_str + '_best.pt')
 
     correct = 0
     total = 0
