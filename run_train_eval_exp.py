@@ -118,7 +118,10 @@ def solve_kernel(cfg, K_train, y_train, K_test, y_test):
             model_result = {}
             test_result = {}
             train_result = {}
-            model, bias = train_ls_dual_model(K_train, y_train, reg)
+            if cfg.SOLVE.LOO_TILT:
+                model, bias = train_ls_dual_model_loo_tilt(K_train, y_train, K_test, y_test, reg)
+            else:
+                model, bias = train_ls_dual_model(K_train, y_train, reg)
             model_result["model"] = model
             model_result["bias"] = bias
             model_result["reg"] = reg

@@ -115,11 +115,11 @@ def load_dataset(dataset_name, bucket="pictureweb", cache=True):
     # TODO: move this to utils and make it use S3
     wrapper = s3_utils.S3Wrapper(bucket=bucket, cache_on_local_disk=cache)
     if dataset_name == 'cifar-10':
-        return np.load(io.BytesIO(wrapper.get(key="datasets/cifar_10_zca_augmented_extra_zca_augment_en9fKkGMMg.npz")))
+        return np.load(io.BytesIO(wrapper.get(key="datasets/cifar_10_zca_augmented_extra_zca_augment_en9fKkGMMg.npz")),  allow_pickle=True)
     elif dataset_name == "cifar-100":
-        return np.load(io.BytesIO(wrapper.get(key="datasets/cifar_100_zca_augmented_u3jS2A3Qww.npz")))
+        return np.load(io.BytesIO(wrapper.get(key="datasets/cifar_100_zca_augmented_u3jS2A3Qww.npz")), allow_pickle=True)
     elif dataset_name == 'mnist':
-        return np.load(io.BytesIO(wrapper.get(key="datasets/mnist.npz")))
+        return np.load(io.BytesIO(wrapper.get(key="datasets/mnist.npz")), allow_pickle=True)
     else:
         raise Exception('Unknown dataset "{}"'.format(dataset_name))
 
