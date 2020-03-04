@@ -16,11 +16,8 @@ bash docker_connect.sh
 ```
 
 Notes: 
+* Kernel code is tuned for tesla v100 GPUs, will be substanially slower on other gpus
 
-    - Kernel code is tuned for tesla v100 GPUs, will be substanially slower on other gpus
-
-    - All above mentioned code downloads a preprocessed cifar10/cifar100/cifar10.1 dataset 
-      from a public S3 bucket. But the raw pre-processing code used to generate those datasets
-      can be inspected in ``` preprocess.py ```
+* All above mentioned code downloads a preprocessed cifar10/cifar100/cifar10.1 dataset  from a public S3 bucket. But the raw pre-processing code used to generate those datasets can be inspected in ``` preprocess.py ```
 
 
