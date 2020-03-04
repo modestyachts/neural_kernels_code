@@ -120,6 +120,8 @@ def load_dataset(dataset_name, bucket="pictureweb", cache=True):
         return np.load(io.BytesIO(wrapper.get(key="datasets/cifar_100_zca_augmented_u3jS2A3Qww.npz")), allow_pickle=True)
     elif dataset_name == 'mnist':
         return np.load(io.BytesIO(wrapper.get(key="datasets/mnist.npz")), allow_pickle=True)
+    elif dataset_name == 'cifar-10-raw':
+        return np.load(io.BytesIO(wrapper.get(key="datasets/cifar.npz")),  allow_pickle=True)
     else:
         raise Exception('Unknown dataset "{}"'.format(dataset_name))
 
