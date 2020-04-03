@@ -1,0 +1,17 @@
+KERNEL:
+  ARCH:
+  - layer: conv5zp
+  - layer: relu
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+  - layer: pool2
+    store_norm: false
+    precision: float64
+  - layer: conv2
+    store_norm: True
+    precision: float64
